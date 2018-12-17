@@ -1,0 +1,16 @@
+
+#+BEGIN_SRC elisp
+;; example capturing org propertry drawer items for org capture:
+(clipboard-collector-create cc-capture-rss
+ (("^http.*twitter.com"                           ":TWITTER: %s")
+  ("^http.*reddit.com"                            ":REDDIT: %s")
+  ("^http.*github.com"                            ":GITHUB: %s")
+  ("^http.*youtube.com"                           ":YOUTUBE: %s")
+  ("^http.*stack.*.com"                           ":STACK: %s")
+  ("^https?://.*\\.[a-z]+/?\\'"                   ":DOMAIN: %s")
+  ("^.*@.*"                                       ":MAIL: %s")
+  ("^http.*\\(dotemacs\\|.?emacs\\|.?emacs.d\\)"  ":DOTEMACS: %s"))
+ (lambda (items)
+   (clipboard-collector-finish-default items)
+   (org-capture-finalize)))
+#+END_SRC

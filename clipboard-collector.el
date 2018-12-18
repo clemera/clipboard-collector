@@ -38,6 +38,7 @@
   "This keymap sets up the exit binding for clipboard collection
   commands.")
 
+;;;###autoload
 (define-minor-mode clipboard-collector-mode
   "Start collecting clipboard items.
 
@@ -46,6 +47,10 @@ Rules used are defined in `clipboard-collector--rules'."
   :global t
   (if clipboard-collector-mode
       (progn
+        ;; set defaults
+        (setq clipboard-collector--finish-function
+              #'clipboard-collector-finish-default)
+        (setq clipboard-collector--rules '((".*" "%s")))
         (setq clipboard-collector--last-clip "")
         (funcall interprogram-cut-function "")
         (setq clipboard-collector--items nil)
@@ -108,7 +113,7 @@ ITEM is added to `clipboard-collector--items'."
 
 
 ;; configure those for collecting
-(defvar clipboard-collector--rules nil
+(defvar clipboard-collector--rules '((".*" "%s"))
   "Clipboard collection rules.
 
 Uses the following list format:
@@ -126,7 +131,8 @@ specify TRANSFORM-CLIPBOARD-FUNC. This is applied before contents
 are applied to TRANSFORM-FORMAT-STRING and can use match-data of
 the matched regex.")
 
-(defvar clipboard-collector--finish-function nil
+(defvar clipboard-collector--finish-function
+  #'clipboard-collector-finish-default
   "Default function used by `clipboard-collector-finish'.")
 
 (defvar clipboard-collector--timer nil)
@@ -138,7 +144,7 @@ Uses `clipboard-collector--finish-function' ."
   (interactive)
   (clipboard-collector-mode -1)
   (funcall clipboard-collector--finish-function
-           (nreverse (mapcar #'cdr clipboard-collector--items)))))
+           (nreverse (mapcar #'cdr clipboard-collector--items))))
 
 (defvar clipboard-collector-display-function
   #'clipboard-collector-display
@@ -157,6 +163,7 @@ Called with collected item.")
       (insert (pop items)
               (if items "\n" "")))))
 
+;;;###autoload
 (defmacro clipboard-collector-create (name rules &optional finishf)
   "Create clipboard collector command named NAME.
 
@@ -183,10 +190,10 @@ This command enables `clipboard-collector-mode' which binds
 on the collected items. "
               (pp rules) (pp finishf))
      (interactive)
+     (clipboard-collector-mode 1)
      (setq clipboard-collector--finish-function
            (or ',finishf #'clipboard-collector-finish-default))
-     (setq clipboard-collector--rules ',rules)
-     (clipboard-collector-mode 1)))
+     (setq clipboard-collector--rules ',rules)))
 
 
 (provide 'clipboard-collector)

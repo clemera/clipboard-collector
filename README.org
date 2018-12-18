@@ -1,16 +1,29 @@
 * Introduction
 
 When collecting information using copy/paste, it would be useful if one could
-stay at one place to copy things instead of constantly switching between the
-place where you copy and the place where you paste.
+stay at one place to copy things and later insert them all at once at another
+place. Emacs has =append-next-kill= but it only works inside Emacs and it only
+applies to the very next command. Further it would be great if Emacs could
+detect specific clipboard entries and transform them to a different format
+automatically. =clipboard-collector= provides you with those features.
 
-Further it would be great if Emacs could detect clipboard entries and adjust
-them to the format one would like to have them.
+You can use it to simply collect multiple entries by binding
+=clipboard-collector-mode= to a key:
 
-This is what clipboard-collector is about. Here is an example for collecting
-contact information from a website for org capture (contact info gets
-transformed to be used as org property drawer items).
+#+BEGIN_SRC elisp
+(global-set-key (kbd "C-M-w") 'clipboard-collector-mode)
+#+END_SRC
 
+Once called the clipboard is observed and any text that is copied/killed gets
+collected (even when done outside of Emacs). To finish use =C-c C-c= in any
+buffer to insert the collected items separated by newlines.
+
+If you want to have specific rules which items are added and maybe transform
+them before collecting them you can create you own commands using
+=clipboard-collector-create= macro.
+
+Here is an example for collecting contact information from a website for org
+capture (contact info gets transformed to be used as org property drawer items).
 
 #+BEGIN_SRC elisp
 (clipboard-collector-create cc-capture-rss
@@ -35,20 +48,11 @@ When done collecting, you can press =C-c C-c= to call the finalize function (in
 the above example it would inserts the collected items separated by newlines and
 finish org-capture).
 
-If you would like to simply collect items as they are and paste them at some
-other place you could use:
+Rules can also contain a function which gets applied to the clipboard entry
+before the format string is applied. You can use match-data of your matching
+regex in that function, too:
 
 #+BEGIN_SRC elisp
-(global-set-key (kbd "C-M-w")
-  (clipboard-collector-create cc-all
-   ((".*"  "%s"))))
-#+END_SRC
-
-It's also possible to provide a function to transform the contents before
-applying the format string. For example to upcase all collected items you could
-use something like this:
-
-#+BEGIN_SRC elisp
-(clipboard-collector-create cc-all-up
- ((".*"  "Upcased: %s" upcase)))
+(clipboard-collector-create cc-url
+ (("https?://\\(.*\\)"  "Url: %s" (lambda (item) (match-string 1 item)))))
 #+END_SRC

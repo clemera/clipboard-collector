@@ -43,6 +43,7 @@
 
 Rules used are defined in `clipboard-collector--rules'."
   :lighter " cc"
+  :global t
   (if clipboard-collector-mode
       (progn
         (setq clipboard-collector--last-clip "")

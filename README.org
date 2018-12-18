@@ -4,8 +4,8 @@ When collecting information using copy/paste, it would be useful if one could
 stay at one place to copy things instead of constantly switching between the
 place where you copy and the place where you paste.
 
-Further it would be great if Emacs could detect clipboard entries and adjust them
-to the format one would like to have them.
+Further it would be great if Emacs could detect clipboard entries and adjust
+them to the format one would like to have them.
 
 This is what clipboard-collector is about. Here is an example for collecting
 contact information from a website for org capture (contact info gets

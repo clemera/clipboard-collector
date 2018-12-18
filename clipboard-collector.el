@@ -3,6 +3,9 @@
 ;; Copyright (C) 2018  clemera
 
 ;; Author: clemera <clemera@clemera>
+;; URL: https://github.com/clemera/clipboard-collector
+;; Version: 0.1
+;; Package-Requires: ((emacs "24.5"))
 ;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify

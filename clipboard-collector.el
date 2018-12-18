@@ -20,14 +20,26 @@
 
 ;;; Commentary:
 
-;; Provides a macro `clipboard-collector-create' which creates a command to
-;; collects clipboard items according to specific rules and afterwards act on
-;; the collected items.
+;; Use `clipboard-collector-create' to create a command which collects clipboard
+;; items according to specified rules and inserts them later using
+;; `clipboard-collector-finish'.
 ;;
 
 ;;; Code:
 
 
+(defvar clipboard-collector-mode-map
+  (let ((map (make-sparse-keymap)))
+    (prog1 map
+      (define-key map (kbd "C-c C-c") 'clipboard-collector-finish)))
+  "This keymap sets up the exit binding for clipboard collection
+  commands.")
+
+(define-minor-mode clipboard-collector--mode
+  "This mode is for internal use only.
+
+Used by `clipboard-collector--start-watch' to setup the exit
+binding for `clipboard-collector-finish'.")
 
 (defvar clipboard-collector--last-clip nil
   "Save last clipboard entry.")
@@ -102,62 +114,41 @@ the matched regex.")
 
 (defvar clipboard-collector--timer nil)
 
-(defvar clipboard-collector-mode-map
-  (let ((map (make-sparse-keymap)))
-    (prog1 map
-      (define-key map (kbd "C-c C-c") 'clipboard-collector-finish))))
-
-(define-minor-mode clipboard-collector-mode
-  "This mode is for internal use only.
-
-Used by `clipboard-collector-start-watch' to setup an exit
-binding.")
-
-(defun clipboard-collector-start-watch ()
+(defun clipboard-collector--start-watch ()
   "Run a timer to watch for clipboard changes.
 
 If one of regexes of `clipboard-collector--rules' matches call
-`clipboard-collector--collect' with first matching group and
-clipboard contents."
+`clipboard-collector--collect'."
   (interactive)
   (when clipboard-collector--timer
-    (clipboard-collector-stop-watch))
+    (clipboard-collector--stop-watch))
   (setq clipboard-collector--last-clip "")
   (funcall interprogram-cut-function "")
   (setq clipboard-collector--items nil)
   (setq clipboard-collector--timer
         (run-at-time 0 0.2 #'clipboard-collector--try-collect))
-  (clipboard-collector-mode 1)
+  (clipboard-collector--mode 1)
   (message "Start collecting, finish with %s."
            (substitute-command-keys "\\[clipboard-collector-finish]")))
 
 
-
-
-(defun clipboard-collector-stop-watch ()
-  "Run a timer to watch for clipboard changes.
-
-If one of regexes of `clipboard-collector--rules' matches call
-`clipboard-collector--collect' with first matching group and
-clipboard contents."
+(defun clipboard-collector--stop-watch ()
+  "Stop timer to watch for clipboard changes."
   (interactive)
   (when clipboard-collector--timer
     (cancel-timer clipboard-collector--timer)
     (setq clipboard-collector--timer nil)))
 
 (defun clipboard-collector-finish ()
-  "Run a timer to watch for clipboard changes.
+  "Finish collecting clipboard items.
 
-If one of regexes of `clipboard-collector--rules' matches call
-`clipboard-collector--collect' with first matching group and
-clipboard contents."
+Uses `clipboard-collector--finish-function' ."
   (interactive)
-  (clipboard-collector-stop-watch)
+  (clipboard-collector--stop-watch)
   (unwind-protect
       (funcall clipboard-collector--finish-function
                (nreverse (mapcar #'cdr clipboard-collector--items)))
-    (clipboard-collector-mode -1)))
-
+    (clipboard-collector--mode -1)))
 (defvar clipboard-collector-display-function
   #'clipboard-collector-display
   "Function to display collected item.
@@ -175,7 +166,6 @@ Called with collected item.")
       (insert (pop items)
               (if items "\n" "")))))
 
-
 (defmacro clipboard-collector-create (name rules &optional finishf)
   "Create clipboard collector command named NAME.
 
@@ -184,7 +174,7 @@ for changes. If the content of a clipboard change match a rule of
 RULES with format of `clipboard-collector--rules', it is
 collected according to the rule.
 
-The command will enable `clipboard-collector-mode' which will
+The command will enable `clipboard-collector--mode' which will
 bind `clipboard-collector-finish' to finish collecting items
 using FINISHF which defaults to
 `clipboard-collector-finish-default'."
@@ -194,7 +184,7 @@ to the following rules (see `clipboard-collector--rules'):
 
 %s
 
-This command enables `clipboard-collector-mode' which binds
+This command enables `clipboard-collector--mode' which binds
 `clipboard-collector-finish' to apply function
 
 `%s'
@@ -205,7 +195,7 @@ on the collected items. "
      (setq clipboard-collector--finish-function
            (or ',finishf #'clipboard-collector-finish-default))
      (setq clipboard-collector--rules ',rules)
-     (clipboard-collector-start-watch)))
+     (clipboard-collector--start-watch)))
 
 
 (provide 'clipboard-collector)

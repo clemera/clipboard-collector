@@ -5,7 +5,7 @@
 ;; Author: clemera <clemera@clemera>
 ;; URL: https://github.com/clemera/clipboard-collector
 ;; Version: 0.1
-;; Package-Requires: ((emacs "24.5"))
+;; Package-Requires: ((emacs "25"))
 ;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -47,6 +47,9 @@ Rules used are defined in `clipboard-collector--rules'."
   :global t
   (if clipboard-collector-mode
       (progn
+        (setq cliboard-collector--enable-primary
+              select-enable-primary)
+        (setq select-enable-primary t)
         ;; set defaults
         (setq clipboard-collector--finish-function
               #'clipboard-collector-finish-default)
@@ -59,10 +62,14 @@ Rules used are defined in `clipboard-collector--rules'."
               (run-at-time 0 0.2 #'clipboard-collector--try-collect))
         (message "Start collecting, finish with %s."
                  (substitute-command-keys "\\[clipboard-collector-finish]")))
+    (setq select-enable-primary cliboard-collector--enable-primary)
     (when clipboard-collector--timer
       (cancel-timer clipboard-collector--timer))
     (setq clipboard-collector--timer nil)))
 
+
+(defvar cliboard-collector--enable-primary nil
+  "Save user setting for `select-enable-primary'.")
 
 (defvar clipboard-collector--last-clip nil
   "Save last clipboard entry.")

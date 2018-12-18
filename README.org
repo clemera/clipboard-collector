@@ -9,7 +9,7 @@ to the format one would like to have them.
 
 This is what clipboard-collector is about. Here is an example for collecting
 contact information from a website for org capture (contact info gets
-transformed to be used as property drawer items).
+transformed to be used as org property drawer items).
 
 
 #+BEGIN_SRC elisp
@@ -33,7 +33,7 @@ clipboard contents are transformed via the format string provided above.
 
 When done collecting, you can press =C-c C-c= to call the finalize function (in
 the above example it would inserts the collected items separated by newlines and
-finish the org-capture).
+finish org-capture).
 
 If you would like to simply collect items as they are and paste them at some
 other place you could use:

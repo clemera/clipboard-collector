@@ -42,11 +42,17 @@
 (define-minor-mode clipboard-collector-mode
   "Start collecting clipboard items.
 
-Rules used are defined in `clipboard-collector--rules'."
+Rules used are defined in `clipboard-collector--rules'. Because
+this mode is only for temporary use and you want its bindings to
+have precedence over all other ones when activated,
+`clipboard-collector-mode-map' is made transient while this mode
+is active."
   :lighter " cc"
   :global t
   (if clipboard-collector-mode
       (progn
+        (setq clipboard-collector--transient-exit
+              (set-transient-map clipboard-collector-mode-map t))
         (setq cliboard-collector--enable-primary
               select-enable-primary)
         (setq select-enable-primary t)
@@ -62,6 +68,7 @@ Rules used are defined in `clipboard-collector--rules'."
               (run-at-time 0 0.2 #'clipboard-collector--try-collect))
         (message "Start collecting, finish with %s."
                  (substitute-command-keys "\\[clipboard-collector-finish]")))
+    (funcall clipboard-collector--transient-exit)
     (setq select-enable-primary cliboard-collector--enable-primary)
     (when clipboard-collector--timer
       (cancel-timer clipboard-collector--timer))

@@ -15,11 +15,11 @@ You can use it to simply collect multiple entries by binding
 #+END_SRC
 
 Once called the clipboard is observed and any text that is copied/killed gets
-collected (even when done outside of Emacs). To finish use =C-c C-c= in any
-buffer to insert the collected items separated by newlines.
+collected. To finish use =C-c C-c= in any buffer to insert the collected items
+separated by newlines.
 
-If you want to have specific rules which items are added and maybe transform
-them before collecting them you can create you own commands using
+If you want to have specific rules for which items get collected and maybe
+transform them before collecting them you can create you own commands using
 =clipboard-collector-create= macro.
 
 Here is an example for collecting contact information from a website for org

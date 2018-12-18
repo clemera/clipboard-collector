@@ -8,8 +8,8 @@ Further it would be great if Emacs could detect clipboard entries and adjust the
 to the format one would like to save them.
 
 This is what clipboard-collector is about. Here is an example for collecting
-contact information from a website for org capture (contact info translated to
-be used as property drawer items).
+contact information from a website for org capture (contact info gets
+transformed to be used as property drawer items).
 
 
 

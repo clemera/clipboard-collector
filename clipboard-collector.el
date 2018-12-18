@@ -166,7 +166,7 @@ Called with collected item.")
 
 (defun clipboard-collector-display (item)
   "Display message for ITEM."
-  (message "Collected: %s" item))
+  (message "Collected: '%s'" item))
 
 (defun clipboard-collector-finish-default (items)
   "Insert ITEMS separated by newlines."

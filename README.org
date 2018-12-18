@@ -5,7 +5,8 @@ stay at one place to copy things and later insert them all at once at another
 place. Emacs has =append-next-kill= but it only works inside Emacs and it only
 applies to the very next command. Further it would be great if Emacs could
 detect specific clipboard entries and transform them to a different format
-automatically. =clipboard-collector= provides you with those features on Linux.
+automatically. =clipboard-collector= provides you with those features (tested
+only for Linux).
 
 You can use it to simply collect multiple entries by binding
 =clipboard-collector-mode= to a key:
@@ -59,5 +60,5 @@ regex in that function, too:
 
 * Related projects
 
-There is [[https://github.com/bburns/clipmon][clipmon]] but I wanted something more flexible and I wanted it to work in
-and outside of Emacs.
+There is [[https://github.com/bburns/clipmon][clipmon]] but I wanted something more flexible and I wanted it to work for text
+copied in and outside of Emacs.

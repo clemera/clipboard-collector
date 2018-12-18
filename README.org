@@ -29,13 +29,15 @@ transformed to be used as property drawer items).
 
 This creates a command called =cc-capture-rss=. When called the clipboard is
 observed and on changes which match one of the regexes, the clipboard contents
-are transformed via the format string and saved for later processing.
+are transformed via the format string provided above and saved for later
+processing.
 
-When done you can press =C-c C-c= to call the finalize function (in the above
-example it would inserts the collected items and finish the org-capture).
+When done collecting, you can press =C-c C-c= to call the finalize function (in
+the above example it would inserts the collected items and finish the
+org-capture).
 
-If you would like to simply collect items as they are and paste them at some other
-place afterwards you could use:
+If you would like to simply collect items as they are and paste them at some
+other place you could use:
 
 #+BEGIN_SRC elisp
 (clipboard-collector-create cc-all
@@ -43,8 +45,8 @@ place afterwards you could use:
 #+END_SRC
 
 It's also possible to provide an additional function to transform the contents
-before applying the format string. For example to upcase all collected items you would
-use something like this:
+before applying the format string. For example to upcase all collected items you
+would use something like this:
 
 #+BEGIN_SRC elisp
 (clipboard-collector-create cc-all-up

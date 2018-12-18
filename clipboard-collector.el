@@ -155,7 +155,7 @@ clipboard contents."
   (clipboard-collector-stop-watch)
   (unwind-protect
       (funcall clipboard-collector--finish-function
-               (mapcar #'cdr clipboard-collector--items))
+               (nreverse (mapcar #'cdr clipboard-collector--items)))
     (clipboard-collector-mode -1)))
 
 (defvar clipboard-collector-display-function

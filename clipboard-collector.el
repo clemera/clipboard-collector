@@ -94,7 +94,8 @@ the placeholder is replaced by the clipboard contents.
 
 If you want to transform the clipboard contents using a function
 specify TRANSFORM-CLIPBOARD-FUNC. This is applied before contents
-are applied to TRANSFORM-FORMAT-STRING.")
+are applied to TRANSFORM-FORMAT-STRING and can use match-data of
+the matched regex.")
 
 (defvar clipboard-collector--finish-function nil
   "Default function used by `clipboard-collector-finish'.")

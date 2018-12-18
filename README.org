@@ -40,8 +40,9 @@ If you would like to simply collect items as they are and paste them at some
 other place you could use:
 
 #+BEGIN_SRC elisp
-(clipboard-collector-create cc-all
- ((".*"  "%s")))
+(global-set-key (kbd "C-M-w")
+  (clipboard-collector-create cc-all
+   ((".*"  "%s"))))
 #+END_SRC
 
 It's also possible to provide an function to transform the contents before

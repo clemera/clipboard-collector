@@ -12,7 +12,6 @@ contact information from a website for org capture (contact info gets
 transformed to be used as property drawer items).
 
 
-
 #+BEGIN_SRC elisp
 (clipboard-collector-create cc-capture-rss
  (("^http.*twitter.com"                           ":TWITTER: %s")
@@ -26,4 +25,20 @@ transformed to be used as property drawer items).
  (lambda (items)
    (clipboard-collector-finish-default items)
    (org-capture-finalize)))
+#+END_SRC
+
+This creates a command called =cc-capture-rss=. When called the clipboard is
+observed and on changes which match one of the regexes, the clipboard contents
+are transformed via the format string. It's also possible to provide an
+additional function to transform the contents before applying the format string.
+
+When done you can press =C-c C-c= to call the finalize function (in the above
+example it would inserts the collected items and finish the org-capture).
+
+If you would like to simply collect items as they are and paste them at some other
+place afterwards you could use:
+
+#+BEGIN_SRC elisp
+(clipboard-collector-create cc-all
+ ((".*"  "%s")))
 #+END_SRC

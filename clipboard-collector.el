@@ -102,6 +102,11 @@ the matched regex.")
 
 (defvar clipboard-collector--timer nil)
 
+(defvar clipboard-collector-mode-map
+  (let ((map (make-sparse-keymap)))
+    (prog1 map
+      (define-key map (kbd "C-c C-c") 'clipboard-collector-finish))))
+
 (define-minor-mode clipboard-collector-mode
   "This mode is for internal use only.
 
@@ -126,10 +131,7 @@ clipboard contents."
   (message "Start collecting, finish with %s."
            (substitute-command-keys "\\[clipboard-collector-finish]")))
 
-(defvar clipboard-collector-mode-map
-  (let ((map (make-sparse-keymap)))
-    (prog1 map
-      (define-key map "\r" 'clipboard-collector-finish))))
+
 
 
 (defun clipboard-collector-stop-watch ()

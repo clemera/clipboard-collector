@@ -56,3 +56,8 @@ regex in that function, too:
 (clipboard-collector-create cc-url
  (("https?://\\([^/]*\\)"  "Url: %s" (lambda (item) (match-string 1 item)))))
 #+END_SRC
+
+* Related projects
+
+There is [[https://github.com/bburns/clipmon][clipmon]] but I wanted something more flexible and I wanted it to work in
+and outside of Emacs.

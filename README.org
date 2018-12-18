@@ -54,5 +54,5 @@ regex in that function, too:
 
 #+BEGIN_SRC elisp
 (clipboard-collector-create cc-url
- (("https?://\\(.*\\)"  "Url: %s" (lambda (item) (match-string 1 item)))))
+ (("https?://\\([^/]*\\)"  "Url: %s" (lambda (item) (match-string 1 item)))))
 #+END_SRC

@@ -51,6 +51,7 @@ Rules used are defined in `clipboard-collector--rules'."
         (setq clipboard-collector--finish-function
               #'clipboard-collector-finish-default)
         (setq clipboard-collector--rules '((".*" "%s")))
+        ;; reset clip data
         (setq clipboard-collector--last-clip "")
         (funcall interprogram-cut-function "")
         (setq clipboard-collector--items nil)
@@ -87,14 +88,17 @@ contents transformed according to matched rule."
 
 (defun clipboard-collector--try-collect ()
   "If Clibboard changed and matches rule collect it."
-  (let ((clip (gui-get-selection 'CLIPBOARD))
-        (item nil))
-    (when (and (not (string-empty-p clip))
-               (not (string= clip
-                             clipboard-collector--last-clip))
-               (setq item (clipboard-collector--apply-rule clip)))
-      (setq clipboard-collector--last-clip clip)
-      (clipboard-collector--collect item))))
+    (condition-case nil
+      (let ((clip (gui-get-selection 'CLIPBOARD))
+            (item nil))
+        (when (and (not (string-empty-p clip))
+                   (not (string= clip
+                                 clipboard-collector--last-clip))
+                   (setq item (clipboard-collector--apply-rule clip)))
+          (setq clipboard-collector--last-clip clip)
+          (clipboard-collector--collect item)))
+    (error (progn (message "Error during clipboard collection, exited `clipboard-collector-mode'")
+                  (clipboard-collector-mode -1)))))
 
 
 (defvar clipboard-collector--items nil

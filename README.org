@@ -28,13 +28,12 @@ transformed to be used as property drawer items).
 #+END_SRC
 
 This creates a command called =cc-capture-rss=. When called the clipboard is
-observed and on changes which match one of the regexes, the clipboard contents
-are transformed via the format string provided above and saved for later
-processing.
+observed and any changes which match one of the regexes will be collected. The
+clipboard contents are transformed via the format string provided above.
 
 When done collecting, you can press =C-c C-c= to call the finalize function (in
-the above example it would inserts the collected items and finish the
-org-capture).
+the above example it would inserts the collected items separated by newlines and
+finish the org-capture).
 
 If you would like to simply collect items as they are and paste them at some
 other place you could use:
@@ -45,7 +44,7 @@ other place you could use:
    ((".*"  "%s"))))
 #+END_SRC
 
-It's also possible to provide an function to transform the contents before
+It's also possible to provide a function to transform the contents before
 applying the format string. For example to upcase all collected items you could
 use something like this:
 

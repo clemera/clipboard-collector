@@ -53,9 +53,9 @@ is active."
       (progn
         (setq clipboard-collector--transient-exit
               (set-transient-map clipboard-collector-mode-map t))
-        (setq cliboard-collector--enable-primary
-              select-enable-primary)
-        (setq select-enable-primary t)
+        (setq clipboard-collector--enable-clipboard
+              select-enable-clipboard)
+        (setq select-enable-clipboard t)
         ;; set defaults
         (setq clipboard-collector--finish-function
               #'clipboard-collector-finish-default)
@@ -69,14 +69,15 @@ is active."
         (message "Start collecting, finish with %s."
                  (substitute-command-keys "\\[clipboard-collector-finish]")))
     (funcall clipboard-collector--transient-exit)
-    (setq select-enable-primary cliboard-collector--enable-primary)
+    (setq select-enable-clipboard
+          clipboard-collector--enable-clipboard)
     (when clipboard-collector--timer
       (cancel-timer clipboard-collector--timer))
     (setq clipboard-collector--timer nil)))
 
 
-(defvar cliboard-collector--enable-primary nil
-  "Save user setting for `select-enable-primary'.")
+(defvar clipboard-collector--enable-clipboard  nil
+  "Save user setting for `select-enable-clipboard'.")
 
 (defvar clipboard-collector--last-clip nil
   "Save last clipboard entry.")

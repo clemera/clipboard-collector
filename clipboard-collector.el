@@ -23,9 +23,16 @@
 
 ;;; Commentary:
 
-;; Use `clipboard-collector-create' to create a command which collects clipboard
-;; items according to specified rules and inserts them later using
-;; `clipboard-collector-finish'.
+;; When collecting information using copy/paste, it would be useful if one could
+;; stay at one place to copy things and later insert them all at once at another
+;; place. Emacs has append-next-kill but it only works inside Emacs and it only
+;; applies to the very next command. Further it would be great if Emacs could
+;; detect specific clipboard entries and transform them to a different format
+;; automatically. clipboard-collector provides you with those features (tested
+;; only for Linux).
+
+;; Use `clipboard-collector-mode' or `clipboard-collector-create' to create a
+;; command which collects clipboard items according to specific rules.
 ;;
 
 ;;; Code:

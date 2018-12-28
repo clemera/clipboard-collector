@@ -4,7 +4,7 @@
 
 ;; Author: clemera <clemera@clemera>
 ;; URL: https://github.com/clemera/clipboard-collector
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "25"))
 ;; Keywords: convenience
 

@@ -19,6 +19,10 @@ Once called the clipboard is observed and any text that is copied/killed gets
 collected. To finish use =C-c C-c= in any buffer to insert the collected items
 separated by newlines.
 
+By default a timer is used to poll the clipboard for changes, you can use
+[[https://github.com/DamienCassou/gpastel][gpastel]] to avoid polling the clipboard (using =gpastel-update-hook=). This
+will be done automatically if =gpastel-mode= is found to be active.
+
 If you want to have specific rules for which items get collected and maybe
 transform them before collecting them you can create you own commands using
 =clipboard-collector-create= macro.

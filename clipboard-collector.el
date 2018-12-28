@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2018  Clemens Radermacher
 
-;; Author: Clemens Radermacher <clemera@posteo.org>
+;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; URL: https://github.com/clemera/clipboard-collector
 ;; Version: 0.2
 ;; Package-Requires: ((emacs "25"))

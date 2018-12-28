@@ -1,8 +1,8 @@
 ;;; clipboard-collector.el --- Collect clipboard entries according to regex rules  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018  clemera
+;; Copyright (C) 2018  Clemens Radermacher
 
-;; Author: clemera <clemera@clemera>
+;; Author: Clemens Radermacher <clemera@posteo.org>
 ;; URL: https://github.com/clemera/clipboard-collector
 ;; Version: 0.2
 ;; Package-Requires: ((emacs "25"))

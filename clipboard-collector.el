@@ -38,6 +38,7 @@
   "This keymap sets up the exit binding for clipboard collection
   commands.")
 
+
 ;;;###autoload
 (define-minor-mode clipboard-collector-mode
   "Start collecting clipboard items.
@@ -51,35 +52,52 @@ is active."
   :global t
   (if clipboard-collector-mode
       (progn
-        (setq clipboard-collector--transient-exit
-              (set-transient-map clipboard-collector-mode-map t))
-        (setq clipboard-collector--enable-clipboard
-              select-enable-clipboard)
-        (setq select-enable-clipboard t)
         ;; set defaults
         (setq clipboard-collector--finish-function
               #'clipboard-collector-finish-default)
         (setq clipboard-collector--rules '((".*" "%s")))
-        ;; reset clip data
-        (setq clipboard-collector--last-clip "")
-        (funcall interprogram-cut-function "")
+
+        ;; init clip data
         (setq clipboard-collector--items nil)
-        (setq clipboard-collector--timer
-              (run-at-time 0 0.2 #'clipboard-collector--try-collect))
+        (setq clipboard-collector--last-clip
+              (or (ignore-errors (gui-get-selection 'CLIPBOARD))
+                  ""))
+
+        ;; intercept kills inside emacs
+        (setq clipboard-collector--interprogram-function
+              interprogram-cut-function)
+        (setq interprogram-cut-function
+              (lambda (text)
+                (funcall clipboard-collector--interprogram-function text)
+                ;; collect the final
+                (clipboard-collector--try-collect text)))
+
+        ;; outside emacs use gpastel if available or poll the clipboard
+        (if (bound-and-true-p gpastel-mode)
+            (add-hook 'gpastel-update-hook
+                      'clipboard-collector--try-collect-last-kill)
+          (setq clipboard-collector--timer
+                (run-at-time 0 0.2 #'clipboard-collector--try-collect)))
+
+        ;; make keymap highest priority
+        (setq clipboard-collector--transient-exit
+              (set-transient-map clipboard-collector-mode-map t))
         (message "Start collecting, finish with %s."
                  (substitute-command-keys "\\[clipboard-collector-finish]")))
+
+    (setq interprogram-cut-function
+          clipboard-collector--interprogram-function)
     (funcall clipboard-collector--transient-exit)
-    (setq select-enable-clipboard
-          clipboard-collector--enable-clipboard)
     (when clipboard-collector--timer
       (cancel-timer clipboard-collector--timer))
     (setq clipboard-collector--timer nil)))
 
 
-(defvar clipboard-collector--enable-clipboard  nil
-  "Save user setting for `select-enable-clipboard'.")
+(defvar clipboard-collector--interprogram-function  nil
+  "Save user setting for `interprogram-cut-function'.")
 
-(defvar clipboard-collector--last-clip nil
+
+(defvar clipboard-collector--last-clip ""
   "Save last clipboard entry.")
 
 
@@ -101,10 +119,17 @@ contents transformed according to matched rule."
         (cl-return (cons (car rules)
                          (format format main)))))))
 
-(defun clipboard-collector--try-collect ()
-  "If Clibboard changed and matches rule collect it."
+
+(defun clipboard-collector--try-collect-last-kill ()
+  (clipboard-collector--try-collect (or (car kill-ring) "")))
+
+(defun clipboard-collector--try-collect (&optional clip)
+  "If Clibboard changed and matches rule collect it.
+
+If CLIP is not given `gui-get-selection' is used to check for the
+clipboard entry."
     (condition-case nil
-      (let ((clip (gui-get-selection 'CLIPBOARD))
+      (let ((clip (or clip (gui-get-selection 'CLIPBOARD)))
             (item nil))
         (when (and (not (string-empty-p clip))
                    (not (string= clip

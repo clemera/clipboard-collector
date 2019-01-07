@@ -1,0 +1,3 @@
+*.elc
+clipboard-collector-autoloads.el
+clipboard-collector-pkg.el

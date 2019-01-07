@@ -1,6 +1,6 @@
 ;;; clipboard-collector.el --- Collect clipboard entries according to regex rules  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018  Clemens Radermacher
+;; Copyright (C) 2018-2019  Free Software Foundation, Inc.
 
 ;; Author: Clemens Radermacher <clemera@posteo.net>
 ;; URL: https://github.com/clemera/clipboard-collector

@@ -37,14 +37,54 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'subr-x))   ;string-empty-p
 
 (defvar clipboard-collector-mode-map
   (let ((map (make-sparse-keymap)))
-    (prog1 map
-      (define-key map (kbd "C-c C-c") 'clipboard-collector-finish)))
-  "This keymap sets up the exit binding for clipboard collection
-  commands.")
+    (define-key map (kbd "C-c C-c") 'clipboard-collector-finish)
+    map)
+  "Keymap active during clipboard collection commands.")
 
+
+(defvar clipboard-collector--last-clip ""
+  ;; FIXME: the docstring should say what it holds, rather than what the code
+  ;; using it does (IOW it's the code which "save"s, not the variable).
+  ;; Same comment applies to clipboard-collector--items.
+  "Save last clipboard entry.")
+
+
+(defvar clipboard-collector--items nil
+  "Saves collected items.")
+
+
+;; configure those for collecting
+(defvar clipboard-collector--rules '((".*" "%s"))
+  "Clipboard collection rules.
+
+Uses the following list format:
+
+    (MATCH-REGEX [TRANSFORM-FORMAT-STRING] [TRANSFORM-CLIPBOARD-FUNC])
+
+MATCH-REGEX is the triggering regex, if clipboard contents match
+this regex the clipboard entry will be collected.
+
+Optional TRANSFORM-FORMAT-STRING should be a format string where
+the placeholder is replaced by the clipboard contents.
+
+If you want to transform the clipboard contents using a function
+specify TRANSFORM-CLIPBOARD-FUNC. This is applied before contents
+are applied to TRANSFORM-FORMAT-STRING and can use match-data of
+the matched regex.")
+
+(defvar clipboard-collector--finish-function
+  #'clipboard-collector-finish-default
+  "Default function used by `clipboard-collector-finish'.")
+
+(defvar clipboard-collector--timer nil)
+
+(defvar clipboard-collector--transient-exit nil)
+
+(defvar clipboard-collector-mode nil)
 
 ;;;###autoload
 (define-minor-mode clipboard-collector-mode
@@ -57,55 +97,47 @@ have precedence over all other ones when activated,
 is active."
   :lighter " cc"
   :global t
+  :variable clipboard-collector-mode
   (if clipboard-collector-mode
       (progn
-        ;; set defaults
+        ;; Set defaults.
         (setq clipboard-collector--finish-function
               #'clipboard-collector-finish-default)
         (setq clipboard-collector--rules '((".*" "%s")))
 
-        ;; init clip data
+        ;; Init clip data.
         (setq clipboard-collector--items nil)
         (setq clipboard-collector--last-clip
               (or (ignore-errors (gui-get-selection 'CLIPBOARD))
                   ""))
 
-        ;; intercept kills inside emacs
-        (setq clipboard-collector--interprogram-function
-              interprogram-cut-function)
-        (setq interprogram-cut-function
-              (lambda (text)
-                (funcall clipboard-collector--interprogram-function text)
-                ;; collect the final
-                (clipboard-collector--try-collect text)))
+        ;; Intercept kills inside Emacs.
+        (add-function :after interprogram-cut-function
+                      #'clipboard-collector--try-collect)
 
-        ;; outside emacs use gpastel if available or poll the clipboard
+        ;; Outside Emacs use gpastel if available or poll the clipboard.
         (if (bound-and-true-p gpastel-mode)
             (add-hook 'gpastel-update-hook
-                      'clipboard-collector--try-collect-last-kill)
+                      #'clipboard-collector--try-collect-last-kill)
           (setq clipboard-collector--timer
                 (run-at-time 0 0.2 #'clipboard-collector--try-collect)))
 
-        ;; make keymap highest priority
+        ;; Make keymap highest priority.
+        ;; FIXME: Say why it isn't sufficient to have the map in
+        ;; minor-mode-map-alist?
         (setq clipboard-collector--transient-exit
               (set-transient-map clipboard-collector-mode-map t))
         (message "Start collecting, finish with %s."
                  (substitute-command-keys "\\[clipboard-collector-finish]")))
 
-    (setq interprogram-cut-function
-          clipboard-collector--interprogram-function)
-    (funcall clipboard-collector--transient-exit)
+    (remove-function interprogram-cut-function #'clipboard-collector--try-collect)
+    (when clipboard-collector--transient-exit
+      (funcall clipboard-collector--transient-exit))
+    (remove-hook 'gpastel-update-hook
+                 #'clipboard-collector--try-collect-last-kill)
     (when clipboard-collector--timer
-      (cancel-timer clipboard-collector--timer))
-    (setq clipboard-collector--timer nil)))
-
-
-(defvar clipboard-collector--interprogram-function  nil
-  "Save user setting for `interprogram-cut-function'.")
-
-
-(defvar clipboard-collector--last-clip ""
-  "Save last clipboard entry.")
+      (cancel-timer clipboard-collector--timer)
+      (setq clipboard-collector--timer nil))))
 
 
 (defun clipboard-collector--apply-rule (clip &optional rules)
@@ -147,9 +179,11 @@ clipboard entry."
     (error (progn (message "Error during clipboard collection, exited `clipboard-collector-mode'")
                   (clipboard-collector-mode -1)))))
 
+(defvar clipboard-collector-display-function
+  #'clipboard-collector-display
+  "Function to display collected item.
 
-(defvar clipboard-collector--items nil
-  "Saves collected items.")
+Called with collected item.")
 
 (defun clipboard-collector--collect (item)
   "Collect ITEM.
@@ -158,35 +192,9 @@ ITEM is added to `clipboard-collector--items'."
   ;; replace if new match for same rule
   (cl-delete item clipboard-collector--items
              :test (lambda (i1 i2)
-                     (string= (car i1) (car i1))))
+                     (string= (car i1) (car i2))))
   (push item clipboard-collector--items)
   (funcall clipboard-collector-display-function (cdr item)))
-
-
-;; configure those for collecting
-(defvar clipboard-collector--rules '((".*" "%s"))
-  "Clipboard collection rules.
-
-Uses the following list format:
-
-    (match-regex [transform-format-string] [transform-clipboard-func])
-
-MATCH-REGEX is the triggering regex, if clipboard contents match
-this regex the clipboard entry will be collected.
-
-Optional TRANSFORM-FORMAT-STRING should be a format string where
-the placeholder is replaced by the clipboard contents.
-
-If you want to transform the clipboard contents using a function
-specify TRANSFORM-CLIPBOARD-FUNC. This is applied before contents
-are applied to TRANSFORM-FORMAT-STRING and can use match-data of
-the matched regex.")
-
-(defvar clipboard-collector--finish-function
-  #'clipboard-collector-finish-default
-  "Default function used by `clipboard-collector-finish'.")
-
-(defvar clipboard-collector--timer nil)
 
 (defun clipboard-collector-finish ()
   "Finish collecting clipboard items.
@@ -196,12 +204,6 @@ Uses `clipboard-collector--finish-function' ."
   (clipboard-collector-mode -1)
   (funcall clipboard-collector--finish-function
            (nreverse (mapcar #'cdr clipboard-collector--items))))
-
-(defvar clipboard-collector-display-function
-  #'clipboard-collector-display
-  "Function to display collected item.
-
-Called with collected item.")
 
 (defun clipboard-collector-display (item)
   "Display message for ITEM."

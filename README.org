@@ -66,3 +66,9 @@ regex in that function, too:
 
 There is [[https://github.com/bburns/clipmon][clipmon]] but I wanted something more flexible and I wanted it to work for text
 copied in and outside of Emacs.
+
+* Contribute
+
+See the
+[[https://github.com/clemera/clipboard-collector/blob/master/CONTRIBUTE.asc][contribute]]
+file.

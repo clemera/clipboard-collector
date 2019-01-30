@@ -1,8 +1,8 @@
 * Introduction
 
-#+BEGIN_SRC html
+#+BEGIN_HTML
 <a href="https://elpa.gnu.org/packages/clipboard-collector.html"><img alt="ELPA" src="https://elpa.gnu.org/favicon.png"/></a>
-#+END_SRC
+#+END_HTML
 
 When collecting information using copy/paste, it would be useful if one could
 stay at one place to copy things and later insert them all at once at another

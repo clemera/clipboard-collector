@@ -66,6 +66,20 @@ regex in that function, too:
  (("https?://\\([^/]*\\)"  "Url: %s" (lambda (item) (match-string 1 item)))))
 #+END_SRC
 
+If you just want to apply a matched group to the format string you can provide
+the match group number instead of using a function, too:
+
+#+BEGIN_SRC elisp
+(clipboard-collector-create
+ cc-youtube-rss
+ (("https://www.youtube.com/user/\\(.*\\)"
+   "https://www.youtube.com/feeds/videos.xml?user=%s"
+   1)
+  ("https://www.youtube.com/channel/\\(.*\\)"
+   "https://www.youtube.com/feeds/videos.xml?channel_id=%s"
+   1)))
+#+END_SRC
+
 * Related projects
 
 There is [[https://github.com/bburns/clipmon][clipmon]] but I wanted something more flexible and I wanted it to work for text

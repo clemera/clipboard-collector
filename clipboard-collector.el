@@ -63,18 +63,21 @@
 
 Uses the following list format:
 
-    (MATCH-REGEX [TRANSFORM-FORMAT-STRING] [TRANSFORM-CLIPBOARD-FUNC])
+    (MATCH-REGEX [TRANSFORM-FORMAT-STRING] [TRANSFORM-CLIPBOARD])
 
 MATCH-REGEX is the triggering regex, if clipboard contents match
 this regex the clipboard entry will be collected.
 
 Optional TRANSFORM-FORMAT-STRING should be a format string where
-the placeholder is replaced by the clipboard contents.
+the '%s' placeholder is replaced by the clipboard contents.
 
-If you want to transform the clipboard contents using a function
-specify TRANSFORM-CLIPBOARD-FUNC. This is applied before contents
-are applied to TRANSFORM-FORMAT-STRING and can use match-data of
-the matched regex.")
+Additionally the matched candidated can be transformed by
+specifying TRANSFORM-CLIPBOARD. If it's a function it gets called
+with the matched candidated and its return value will be applied
+to TRANSFORM-FORMAT-STRING. The function can use match-data of
+MATCH-REGEX. In case TRANSFORM-CLIPBOARD is a number the match
+string of that number will be applied to
+TRANSFORM-FORMAT-STRING.")
 
 (defvar clipboard-collector--finish-function
   #'clipboard-collector-finish-default
@@ -145,18 +148,21 @@ is active."
 
 Returns cons of matching regex of used rule and clipboard
 contents transformed according to matched rule."
-  (cl-dolist (rules (or rules clipboard-collector--rules))
-    (when (string-match (car rules) clip)
-      (let ((main (cond ((functionp (car (cddr rules)))
-                         (funcall (car (cddr rules)) clip))
-                        (t clip)))
-            (format (cond ((functionp (cadr rules))
-                           (funcall (cadr rules) (match-string 1 clip)))
-                          ((stringp (cadr rules))
-                           (cadr rules))
-                          (t "%s"))))
-        (cl-return (cons (car rules)
-                         (format format main)))))))
+  (cl-dolist (rule (or rules clipboard-collector--rules))
+    (when (string-match (car rule) clip)
+      (let* ((converter (car (cddr rule)))
+             (transformed (cond ((functionp converter)
+                                 (funcall converter clip))
+                                ((numberp converter)
+                                 (match-string converter clip))
+                                (t clip)))
+             (format (cond ((functionp (cadr rule))
+                            (funcall (cadr rule) (match-string 1 clip)))
+                           ((stringp (cadr rule))
+                            (cadr rule))
+                           (t "%s"))))
+        (cl-return (cons (car rule)
+                         (format format transformed)))))))
 
 
 (defun clipboard-collector--try-collect-last-kill ()

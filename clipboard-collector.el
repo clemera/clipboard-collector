@@ -189,10 +189,6 @@ Called with collected item.")
   "Collect ITEM.
 
 ITEM is added to `clipboard-collector--items'."
-  ;; replace if new match for same rule
-  (cl-delete item clipboard-collector--items
-             :test (lambda (i1 i2)
-                     (string= (car i1) (car i2))))
   (push item clipboard-collector--items)
   (funcall clipboard-collector-display-function (cdr item)))
 

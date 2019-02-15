@@ -218,6 +218,17 @@ Uses `clipboard-collector--finish-function' ."
       (insert (pop items)
               (if items "\n" "")))))
 
+(defun clipboard-collect-region (beg end)
+  "Collect entries for current region lines."
+  (interactive "r")
+  (dolist (line (split-string
+                 (buffer-substring beg end) "\n"
+                 :omit-nulls))
+    (let ((inhibit-message t))
+      (clipboard-collector--try-collect line)))
+  (deactivate-mark)
+  (message "Collected items in region; Continue or finish with C-c C-c"))
+
 ;;;###autoload
 (defmacro clipboard-collector-create (name rules &optional finishf)
   "Create clipboard collector command named NAME.
@@ -231,7 +242,7 @@ The command will enable `clipboard-collector-mode' which will
 bind `clipboard-collector-finish' to finish collecting items
 using FINISHF which defaults to
 `clipboard-collector-finish-default'."
-  `(defun ,name ()
+  `(defun ,name (arg)
      ,(format "Start timer to collect clipboard items according
 to the following rules (see `clipboard-collector--rules'):
 
@@ -242,13 +253,19 @@ This command enables `clipboard-collector-mode' which binds
 
 `%s'
 
-on the collected items. "
+on the collected items.
+
+When called with prefix argument try to collect the lines of
+current region."
               (pp rules) (pp finishf))
-     (interactive)
+     (interactive "P")
      (clipboard-collector-mode 1)
+     ;; override defaults
      (setq clipboard-collector--finish-function
            (or ',finishf #'clipboard-collector-finish-default))
-     (setq clipboard-collector--rules ',rules)))
+     (setq clipboard-collector--rules ',rules)
+     (when (use-region-p))
+     (clipboard-collect-region (region-beginning) (region-end))))
 
 
 (provide 'clipboard-collector)
